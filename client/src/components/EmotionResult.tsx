@@ -55,20 +55,20 @@ export function EmotionResult({
       </div>
 
       {/* Main Result Card */}
-      <Card className="border-indigo-300 bg-gradient-to-br from-slate-800 to-slate-900">
+      <Card className="glass-card-dark border-indigo-500/30 neon-glow-blue">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Emotion Detected</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Large Emotion Display */}
-          <div className={`bg-gradient-to-r ${gradientClass} rounded-lg p-8 text-center text-white`}>
+          <div className={`bg-gradient-to-r ${gradientClass} rounded-lg p-8 text-center text-white neon-glow-blue`}>
             <div className="text-6xl mb-4">{emoji}</div>
             <div className="text-4xl font-bold mb-2">{emotion}</div>
             <div className="text-xl opacity-90">Confidence: {confidence}%</div>
           </div>
 
           {/* Recording Duration */}
-          <div className="bg-slate-700/50 rounded-lg p-4 text-center">
+          <div className="glass-card p-4 text-center">
             <p className="text-sm text-slate-400">Recording Duration</p>
             <p className="text-2xl font-semibold text-indigo-400">{duration}s</p>
           </div>
@@ -76,7 +76,7 @@ export function EmotionResult({
       </Card>
 
       {/* Emotion Breakdown */}
-      <Card className="border-indigo-300 bg-gradient-to-br from-slate-800 to-slate-900">
+      <Card className="glass-card-dark border-indigo-500/30 neon-glow-blue">
         <CardHeader>
           <CardTitle>Emotion Breakdown</CardTitle>
         </CardHeader>
@@ -99,7 +99,7 @@ export function EmotionResult({
       </Card>
 
       {/* Emotion Description */}
-      <Card className="border-indigo-300 bg-gradient-to-br from-slate-800 to-slate-900">
+      <Card className="glass-card-dark border-indigo-500/30 neon-glow-blue">
         <CardHeader>
           <CardTitle>About This Emotion</CardTitle>
         </CardHeader>

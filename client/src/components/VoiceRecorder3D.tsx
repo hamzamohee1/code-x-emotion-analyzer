@@ -102,7 +102,7 @@ function WaveformVisualization({ isRecording }: { isRecording: boolean }) {
       ref={canvasRef}
       width={300}
       height={100}
-      className="border border-indigo-300 rounded-lg bg-black/20"
+      className="glass-card border-indigo-500/30 rounded-lg neon-glow-blue"
     />
   );
 }
@@ -186,7 +186,7 @@ export function VoiceRecorder3D({
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-8">
       {/* 3D Canvas */}
-      <div className="w-full max-w-md h-96 rounded-lg overflow-hidden border border-indigo-300 bg-gradient-to-b from-slate-900 to-slate-800">
+      <div className="w-full max-w-md h-96 rounded-lg overflow-hidden glass-card-dark border-indigo-500/30 neon-glow-blue">
         <Canvas camera={{ position: [0, 0, 2.5] }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
@@ -200,7 +200,7 @@ export function VoiceRecorder3D({
       {isRecording && (
         <div className="flex flex-col items-center gap-4">
           <WaveformVisualization isRecording={isRecording} />
-          <div className="text-lg font-semibold text-indigo-400">
+          <div className="text-lg font-semibold text-indigo-300 animate-glow-pulse">
             Recording: {recordingTime}s / 10s
           </div>
         </div>
@@ -212,7 +212,7 @@ export function VoiceRecorder3D({
           <Button
             onClick={startRecording}
             disabled={isAnalyzing}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="btn-3d gap-2 bg-indigo-600 hover:bg-indigo-700 text-white neon-glow-blue"
             size="lg"
           >
             <Mic className="w-5 h-5" />
@@ -221,7 +221,7 @@ export function VoiceRecorder3D({
         ) : (
           <Button
             onClick={stopRecording}
-            className="gap-2 bg-red-600 hover:bg-red-700 text-white"
+            className="btn-3d gap-2 bg-red-600 hover:bg-red-700 text-white neon-glow-blue"
             size="lg"
           >
             <Square className="w-5 h-5" />
@@ -232,8 +232,8 @@ export function VoiceRecorder3D({
 
       {isAnalyzing && (
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <p className="mt-2 text-indigo-400">Analyzing emotion...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+          <p className="mt-2 text-indigo-300 font-medium animate-glow-pulse">Analyzing emotion...</p>
         </div>
       )}
     </div>

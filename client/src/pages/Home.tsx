@@ -111,14 +111,14 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-4 md:p-8">
+    <div className="min-h-screen bg-black p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+        <div className="text-center mb-12 animate-float">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 gradient-text">
             Voice Emotion Analyzer
           </h1>
-          <p className="text-lg text-slate-300">
+          <p className="text-lg text-slate-400 font-light">
             Record your voice and discover your emotional state
           </p>
         </div>
@@ -145,7 +145,7 @@ export default function Home() {
           )}
           {/* Info Section */}
           <div className="w-full max-w-2xl space-y-6 mt-8">
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-indigo-300 rounded-lg p-6">
+            <div className="glass-card-dark p-6 neon-glow-blue">
               <h2 className="text-2xl font-bold text-white mb-4">How It Works</h2>
               <ol className="space-y-4 text-slate-300">
                 <li className="flex gap-4">
@@ -175,7 +175,7 @@ export default function Home() {
               </ol>
             </div>
 
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-indigo-300 rounded-lg p-6">
+            <div className="glass-card-dark p-6 neon-glow-blue">
               <h2 className="text-2xl font-bold text-white mb-4">Emotions Detected</h2>
               <div className="grid grid-cols-2 gap-3 text-slate-300">
                 <div className="flex items-center gap-2">
