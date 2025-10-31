@@ -1,6 +1,6 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, emotionAnalyses, InsertEmotionAnalysis } from "../drizzle/schema";
+import { InsertUser, users, emotionAnalyses, InsertEmotionAnalysis, emotionFeedback, InsertEmotionFeedback } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -108,7 +108,58 @@ export async function getUserEmotionHistory(userId: number) {
     .select()
     .from(emotionAnalyses)
     .where(eq(emotionAnalyses.userId, userId))
-    .orderBy((t) => desc(t.createdAt));
+    .orderBy(desc(emotionAnalyses.createdAt));
+}
+
+export async function submitEmotionFeedback(feedback: InsertEmotionFeedback) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db
+    .insert(emotionFeedback)
+    .values(feedback)
+    .$returningId();
+  return result[0]?.id;
+}
+
+export async function getUserFeedbackHistory(userId: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return db
+    .select()
+    .from(emotionFeedback)
+    .where(eq(emotionFeedback.userId, userId))
+    .orderBy(desc(emotionFeedback.createdAt));
+}
+
+export async function getFeedbackStats() {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const totalFeedback = await db
+    .select({ count: count() })
+    .from(emotionFeedback);
+  
+  const correctedFeedback = await db
+    .select({ count: count() })
+    .from(emotionFeedback)
+    .where(eq(emotionFeedback.isCorrected, true));
+
+  const total = totalFeedback[0]?.count || 0;
+  const corrected = correctedFeedback[0]?.count || 0;
+
+  return {
+    total,
+    corrected,
+    accuracy: total > 0 ? ((total - corrected) / total) * 100 : 0,
+  };
 }
 
 // TODO: add more feature queries here as your schema grows.

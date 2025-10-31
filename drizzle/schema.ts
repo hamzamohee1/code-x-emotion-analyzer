@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -38,3 +38,22 @@ export const emotionAnalyses = mysqlTable("emotionAnalyses", {
 
 export type EmotionAnalysis = typeof emotionAnalyses.$inferSelect;
 export type InsertEmotionAnalysis = typeof emotionAnalyses.$inferInsert;
+
+// Emotion Analysis Feedback Table
+export const emotionFeedback = mysqlTable("emotionFeedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  analysisId: int("analysisId").notNull().references(() => emotionAnalyses.id),
+  aiPredictedEmotion: varchar("aiPredictedEmotion", { length: 64 }).notNull(),
+  aiConfidence: int("aiConfidence").notNull(),
+  userCorrectedEmotion: varchar("userCorrectedEmotion", { length: 64 }),
+  userConfidence: int("userConfidence"),
+  isCorrected: boolean("isCorrected").default(false).notNull(),
+  feedback: text("feedback"),
+  helpfulnessRating: int("helpfulnessRating"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EmotionFeedback = typeof emotionFeedback.$inferSelect;
+export type InsertEmotionFeedback = typeof emotionFeedback.$inferInsert;

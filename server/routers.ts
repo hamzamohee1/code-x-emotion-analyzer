@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createEmotionAnalysis, getUserEmotionHistory } from "./db";
+import { createEmotionAnalysis, getUserEmotionHistory, submitEmotionFeedback, getUserFeedbackHistory, getFeedbackStats } from "./db";
 import { analyzeEmotionFromAudio } from "./emotionAnalysis";
 
 export const appRouter = router({
@@ -63,6 +63,44 @@ export const appRouter = router({
     history: protectedProcedure.query(async ({ ctx }) => {
       return getUserEmotionHistory(ctx.user.id);
     }),
+  }),
+
+  feedback: router({
+    submit: protectedProcedure
+      .input(z.object({
+        analysisId: z.number(),
+        aiPredictedEmotion: z.string(),
+        aiConfidence: z.number(),
+        userCorrectedEmotion: z.string().optional(),
+        userConfidence: z.number().optional(),
+        isCorrected: z.boolean(),
+        feedback: z.string().optional(),
+        helpfulnessRating: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const feedbackId = await submitEmotionFeedback({
+          userId: ctx.user.id,
+          analysisId: input.analysisId,
+          aiPredictedEmotion: input.aiPredictedEmotion,
+          aiConfidence: input.aiConfidence,
+          userCorrectedEmotion: input.userCorrectedEmotion || null,
+          userConfidence: input.userConfidence || null,
+          isCorrected: input.isCorrected,
+          feedback: input.feedback || null,
+          helpfulnessRating: input.helpfulnessRating || null,
+        });
+        return { success: true, feedbackId };
+      }),
+    
+    getUserHistory: protectedProcedure
+      .query(async ({ ctx }) => {
+        return getUserFeedbackHistory(ctx.user.id);
+      }),
+    
+    getStats: publicProcedure
+      .query(async () => {
+        return getFeedbackStats();
+      }),
   }),
 });
 

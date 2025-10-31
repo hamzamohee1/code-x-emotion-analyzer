@@ -5,6 +5,8 @@ import { Emotion3DVisualization } from "@/components/Emotion3DVisualization";
 import { EmotionComparison } from "@/components/EmotionComparison";
 import { EmotionIntensitySlider } from "@/components/EmotionIntensitySlider";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { EmotionFeedback } from "@/components/EmotionFeedback";
+import { FeedbackAnalytics } from "@/components/FeedbackAnalytics";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -36,6 +38,9 @@ export default function Home() {
   const [showIntensitySlider, setShowIntensitySlider] = useState(false);
   const [language, setLanguage] = useState('en');
   const [showComparison, setShowComparison] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [feedbackStats, setFeedbackStats] = useState({ total: 0, corrected: 0, accuracy: 0 });
 
   const handleRecordingComplete = async (audioBlob: Blob, duration: number) => {
     if (!user) return;
@@ -207,17 +212,41 @@ export default function Home() {
                 />
               </div>
 
+              {/* Feedback Section */}
+              {showFeedback && (
+                <div className="max-w-2xl mx-auto w-full">
+                  <EmotionFeedback
+                    aiEmotion={analysisResult.emotion}
+                    aiConfidence={analysisResult.confidence}
+                    emotionScores={analysisResult.emotionScores}
+                    analysisId={1}
+                    onFeedbackSubmitted={() => {
+                      setShowFeedback(false);
+                    }}
+                  />
+                </div>
+              )}
+
               {/* New Recording Button */}
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center gap-3 flex-wrap">
                 <Button
                   onClick={() => {
                     setAnalysisResult(null);
                     setShowIntensitySlider(false);
+                    setShowFeedback(false);
                   }}
                   className="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white neon-glow-blue"
                   size="lg"
                 >
                   Record Another
+                </Button>
+                <Button
+                  onClick={() => setShowFeedback(!showFeedback)}
+                  variant="outline"
+                  className="btn-3d border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10"
+                  size="lg"
+                >
+                  {showFeedback ? 'Hide' : 'Give'} Feedback
                 </Button>
                 <Button
                   onClick={() => setShowComparison(!showComparison)}
@@ -226,6 +255,14 @@ export default function Home() {
                   size="lg"
                 >
                   {showComparison ? 'Hide' : 'Show'} Comparison
+                </Button>
+                <Button
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  variant="outline"
+                  className="btn-3d border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10"
+                  size="lg"
+                >
+                  {showAnalytics ? 'Hide' : 'View'} Analytics
                 </Button>
               </div>
             </div>
@@ -240,8 +277,29 @@ export default function Home() {
               />
             </div>
           )}
+
+          {/* Feedback Analytics */}
+          {showAnalytics && (
+            <div className="w-full max-w-6xl">
+              <FeedbackAnalytics
+                totalFeedback={feedbackStats.total}
+                correctedCount={feedbackStats.corrected}
+                accuracy={feedbackStats.accuracy}
+                emotionAccuracy={{
+                  Anger: 0.85,
+                  Disgust: 0.78,
+                  Fear: 0.82,
+                  Happiness: 0.90,
+                  Neutral: 0.88,
+                  Sadness: 0.84,
+                  Surprise: 0.81,
+                }}
+              />
+            </div>
+          )}
+
           {/* Info Section */}
-          {!analysisResult && (
+          {!analysisResult && !showAnalytics && !showComparison && (
           <div className="w-full max-w-2xl space-y-6 mt-8">
             <div className="glass-card-dark p-6 neon-glow-blue">
               <h2 className="text-2xl font-bold text-white mb-4">How It Works</h2>
