@@ -2,6 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { VoiceRecorder3D } from "@/components/VoiceRecorder3D";
 import { EmotionResult } from "@/components/EmotionResult";
+import { Emotion3DVisualization } from "@/components/Emotion3DVisualization";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
@@ -123,17 +124,17 @@ export default function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
+        <div className="flex flex-col items-center justify-center">
           {/* Recorder Section */}
           {!analysisResult ? (
-            <div className="w-full lg:w-1/2 flex justify-center">
+            <div className="w-full flex justify-center">
               <VoiceRecorder3D
                 onRecordingComplete={handleRecordingComplete}
                 isAnalyzing={isAnalyzing}
               />
             </div>
           ) : (
-            <div className="w-full lg:w-1/2 flex justify-center">
+            <div className="w-full flex justify-center">
               <EmotionResult
                 emotion={analysisResult.emotion}
                 confidence={analysisResult.confidence}
@@ -142,9 +143,8 @@ export default function Home() {
               />
             </div>
           )}
-
           {/* Info Section */}
-          <div className="w-full lg:w-1/2 space-y-6">
+          <div className="w-full max-w-2xl space-y-6 mt-8">
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-indigo-300 rounded-lg p-6">
               <h2 className="text-2xl font-bold text-white mb-4">How It Works</h2>
               <ol className="space-y-4 text-slate-300">

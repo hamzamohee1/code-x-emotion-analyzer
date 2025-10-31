@@ -34,7 +34,9 @@ Once you click "Stop Recording", our AI analyzes your voice in real-time. The sy
 
 ### Viewing Results
 
-Your emotion analysis displays as a large result card showing your primary emotion with a confidence score. Below that, you'll see a detailed breakdown of all seven emotions with percentage scores, helping you understand the full emotional spectrum detected in your voice.
+Your emotion analysis displays with a stunning 3D visualization that transforms based on your detected emotion. Each emotion has a unique visual representation: Anger shows a red icosahedron spinning rapidly, Happiness displays a golden sphere with gentle pulses, Sadness renders a blue torus with calm rotation, and each emotion has its own color scheme and shape. The visualization includes particle effects and an animated aura ring that intensifies with your confidence score.
+
+Below the 3D visualization, you'll see your primary emotion with a confidence score. A detailed breakdown of all seven emotions with percentage scores helps you understand the full emotional spectrum detected in your voice.
 
 ---
 

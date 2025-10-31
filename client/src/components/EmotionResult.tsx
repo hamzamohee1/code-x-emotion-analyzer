@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
+import { Emotion3DVisualization } from "./Emotion3DVisualization";
 
 interface EmotionScores {
   [key: string]: number;
@@ -48,6 +49,11 @@ export function EmotionResult({
 
   return (
     <div className="space-y-6 w-full max-w-2xl">
+      {/* 3D Emotion Visualization */}
+      <div className="flex justify-center">
+        <Emotion3DVisualization emotion={emotion} confidence={confidence} />
+      </div>
+
       {/* Main Result Card */}
       <Card className="border-indigo-300 bg-gradient-to-br from-slate-800 to-slate-900">
         <CardHeader>
