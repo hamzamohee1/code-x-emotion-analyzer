@@ -4,39 +4,54 @@ import { OrbitControls, Sphere } from "@react-three/drei";
 import * as THREE from "three";
 import { Mic, Square } from "lucide-react";
 import { Button } from "./ui/button";
+import { useAudioAnalyzer } from "@/hooks/useAudioAnalyzer";
+import { RealtimeFrequencyChart } from "./RealtimeFrequencyChart";
+import { GuidedRecordingPrompts } from "./GuidedRecordingPrompts";
 
 interface VoiceRecorder3DProps {
   onRecordingComplete: (audioBlob: Blob, duration: number) => void;
   isAnalyzing?: boolean;
+  showPrompts?: boolean;
 }
 
 // 3D Animated Sphere Component
-function AnimatedSphere({ isRecording }: { isRecording: boolean }) {
+function AnimatedSphere({ isRecording, analyzerData }: { isRecording: boolean; analyzerData: any }) {
   const meshRef = useRef<THREE.Mesh | null>(null);
   const materialRef = useRef<THREE.MeshPhongMaterial | null>(null);
-  const [scale, setScale] = useState(1);
 
   useFrame(({ clock }) => {
-    if (meshRef.current) {
+    if (meshRef.current && materialRef.current) {
       meshRef.current.rotation.x += 0.005;
       meshRef.current.rotation.y += 0.008;
 
-      if (isRecording) {
+      if (isRecording && analyzerData) {
+        const { energy, bass, mid, treble } = analyzerData;
+        
+        // Scale based on energy
+        const baseScale = 1 + energy * 0.3;
+        const bassScale = (bass / 255) * 0.15;
+        const midScale = (mid / 255) * 0.15;
+        const trebleScale = (treble / 255) * 0.15;
+        
+        const totalScale = baseScale + bassScale + midScale + trebleScale;
+        meshRef.current.scale.set(totalScale, totalScale, totalScale);
+        
+        // Color based on frequency distribution
+        const hue = (bass / 255) * 0.1 + (mid / 255) * 0.2 + (treble / 255) * 0.3;
+        materialRef.current.color.setHSL(hue % 1, 0.8, 0.5);
+        materialRef.current.emissiveIntensity = 0.3 + energy * 0.5;
+      } else if (isRecording) {
         const pulse = Math.sin(clock.getElapsedTime() * 3) * 0.15 + 1;
         meshRef.current.scale.set(pulse, pulse, pulse);
         
-        if (materialRef.current) {
-          materialRef.current.emissive.setHSL(
-            (clock.getElapsedTime() * 0.2) % 1,
-            0.8,
-            0.4
-          );
-        }
+        materialRef.current.emissive.setHSL(
+          (clock.getElapsedTime() * 0.2) % 1,
+          0.8,
+          0.4
+        );
       } else {
         meshRef.current.scale.set(1, 1, 1);
-        if (materialRef.current) {
-          materialRef.current.emissive.setHSL(0.6, 0.8, 0.3);
-        }
+        materialRef.current.emissive.setHSL(0.6, 0.8, 0.3);
       }
     }
   });
@@ -55,61 +70,10 @@ function AnimatedSphere({ isRecording }: { isRecording: boolean }) {
   );
 }
 
-// Waveform visualization component
-function WaveformVisualization({ isRecording }: { isRecording: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | undefined>(undefined);
-
-  useEffect(() => {
-    if (!isRecording || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const bars = 50;
-    let animationFrame = 0;
-
-    const animate = () => {
-      animationFrame++;
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#4f46e5";
-      const barWidth = canvas.width / bars;
-
-      for (let i = 0; i < bars; i++) {
-        const height =
-          (Math.sin(animationFrame * 0.05 + i * 0.3) * 0.5 + 0.5) *
-          canvas.height;
-        ctx.fillRect(i * barWidth, canvas.height - height, barWidth - 2, height);
-      }
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isRecording]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      width={300}
-      height={100}
-      className="glass-card border-indigo-500/30 rounded-lg neon-glow-blue"
-    />
-  );
-}
-
 export function VoiceRecorder3D({
   onRecordingComplete,
   isAnalyzing = false,
+  showPrompts = true,
 }: VoiceRecorder3DProps) {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -117,6 +81,9 @@ export function VoiceRecorder3D({
   const streamRef = useRef<MediaStream | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  
+  // Use audio analyzer hook
+  const analyzerData = useAudioAnalyzer(isRecording ? streamRef.current : null);
 
   const startRecording = async () => {
     try {
@@ -184,25 +151,22 @@ export function VoiceRecorder3D({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 p-8">
+    <div className="flex flex-col items-center justify-center gap-8 w-full">
       {/* 3D Canvas */}
-      <div className="w-full max-w-md h-96 rounded-lg overflow-hidden glass-card-dark border-indigo-500/30 neon-glow-blue">
+      <div className="w-full max-w-2xl h-96 rounded-lg overflow-hidden glass-card-dark border-indigo-500/30 neon-glow-blue">
         <Canvas camera={{ position: [0, 0, 2.5] }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           <pointLight position={[-10, -10, 10]} intensity={0.5} />
-          <AnimatedSphere isRecording={isRecording} />
+          <AnimatedSphere isRecording={isRecording} analyzerData={analyzerData} />
           <OrbitControls autoRotate autoRotateSpeed={2} />
         </Canvas>
       </div>
 
-      {/* Waveform Visualization */}
+      {/* Real-Time Frequency Chart */}
       {isRecording && (
-        <div className="flex flex-col items-center gap-4">
-          <WaveformVisualization isRecording={isRecording} />
-          <div className="text-lg font-semibold text-indigo-300 animate-glow-pulse">
-            Recording: {recordingTime}s / 10s
-          </div>
+        <div className="w-full max-w-2xl">
+          <RealtimeFrequencyChart analyzerData={analyzerData} isRecording={isRecording} />
         </div>
       )}
 
@@ -229,6 +193,28 @@ export function VoiceRecorder3D({
           </Button>
         )}
       </div>
+
+      {/* Recording Timer */}
+      {isRecording && (
+        <div className="text-center">
+          <div className="text-lg font-semibold text-indigo-300 animate-glow-pulse">
+            Recording: {recordingTime}s / 10s
+          </div>
+          <div className="mt-2 w-48 bg-black/30 rounded-full h-2">
+            <div
+              className="bg-gradient-to-r from-indigo-500 to-indigo-400 h-2 rounded-full transition-all"
+              style={{ width: `${(recordingTime / 10) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Guided Recording Prompts */}
+      {showPrompts && (
+        <div className="w-full max-w-2xl">
+          <GuidedRecordingPrompts isRecording={isRecording} recordingTime={recordingTime} />
+        </div>
+      )}
 
       {isAnalyzing && (
         <div className="text-center">

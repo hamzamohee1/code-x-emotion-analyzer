@@ -27,3 +27,10 @@
 - [x] Enhance UI with modern dark design patterns
 - [x] Optimize audio preprocessing for better accuracy
 - [x] Add confidence threshold indicators
+- [x] Implement emotion comparison feature
+- [x] Add emotion intensity slider
+- [x] Add multi-language support
+- [x] Create real-time waveform analysis display
+- [x] Add guided recording prompts
+- [x] Make 3D ball respond to real-time audio frequencies
+- [x] Create frequency chart that moves with sound in real-time

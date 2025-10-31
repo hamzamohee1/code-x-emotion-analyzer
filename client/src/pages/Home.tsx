@@ -1,16 +1,28 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { VoiceRecorder3D } from "@/components/VoiceRecorder3D";
 import { EmotionResult } from "@/components/EmotionResult";
 import { Emotion3DVisualization } from "@/components/Emotion3DVisualization";
+import { EmotionComparison } from "@/components/EmotionComparison";
+import { EmotionIntensitySlider } from "@/components/EmotionIntensitySlider";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 
 interface AnalysisResult {
   emotion: string;
   confidence: number;
+  emotionScores: Record<string, number>;
+  duration: number;
+}
+
+interface EmotionRecord {
+  id: string;
+  emotion: string;
+  confidence: number;
+  timestamp: Date;
   emotionScores: Record<string, number>;
   duration: number;
 }
@@ -20,6 +32,10 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emotionRecords, setEmotionRecords] = useState<EmotionRecord[]>([]);
+  const [showIntensitySlider, setShowIntensitySlider] = useState(false);
+  const [language, setLanguage] = useState('en');
+  const [showComparison, setShowComparison] = useState(false);
 
   const handleRecordingComplete = async (audioBlob: Blob, duration: number) => {
     if (!user) return;
@@ -68,12 +84,39 @@ export default function Home() {
       // await trpc.emotion.analyze.useMutation() would be used in a proper component
 
       setAnalysisResult(result);
+      
+      // Add to emotion records for comparison
+      const newRecord: EmotionRecord = {
+        id: Date.now().toString(),
+        emotion: result.emotion,
+        confidence: result.confidence,
+        timestamp: new Date(),
+        emotionScores: result.emotionScores,
+        duration: result.duration,
+      };
+      setEmotionRecords([...emotionRecords, newRecord]);
+      setShowIntensitySlider(true);
     } catch (err) {
       console.error("Error analyzing emotion:", err);
       setError("Failed to analyze emotion. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleIntensityConfirm = (adjustedConfidence: number, adjustedScores: Record<string, number>) => {
+    if (analysisResult) {
+      setAnalysisResult({
+        ...analysisResult,
+        confidence: adjustedConfidence,
+        emotionScores: adjustedScores,
+      });
+    }
+    setShowIntensitySlider(false);
+  };
+
+  const handleRemoveRecord = (id: string) => {
+    setEmotionRecords(emotionRecords.filter(r => r.id !== id));
   };
 
   if (loading) {
@@ -123,27 +166,82 @@ export default function Home() {
           </p>
         </div>
 
+        {/* Language Selector */}
+        <div className="mb-8 flex justify-end">
+          <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
+        </div>
+
         {/* Main Content */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center space-y-8">
           {/* Recorder Section */}
           {!analysisResult ? (
             <div className="w-full flex justify-center">
               <VoiceRecorder3D
                 onRecordingComplete={handleRecordingComplete}
                 isAnalyzing={isAnalyzing}
+                showPrompts={true}
               />
             </div>
           ) : (
-            <div className="w-full flex justify-center">
-              <EmotionResult
-                emotion={analysisResult.emotion}
-                confidence={analysisResult.confidence}
-                emotionScores={analysisResult.emotionScores}
-                duration={analysisResult.duration}
+            <div className="w-full space-y-8">
+              {/* Intensity Slider */}
+              {showIntensitySlider && (
+                <div className="max-w-2xl mx-auto w-full">
+                  <EmotionIntensitySlider
+                    emotion={analysisResult.emotion}
+                    initialConfidence={analysisResult.confidence}
+                    emotionScores={analysisResult.emotionScores}
+                    onConfirm={handleIntensityConfirm}
+                    onCancel={() => setShowIntensitySlider(false)}
+                  />
+                </div>
+              )}
+
+              {/* Result Display */}
+              <div className="w-full flex justify-center">
+                <EmotionResult
+                  emotion={analysisResult.emotion}
+                  confidence={analysisResult.confidence}
+                  emotionScores={analysisResult.emotionScores}
+                  duration={analysisResult.duration}
+                />
+              </div>
+
+              {/* New Recording Button */}
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={() => {
+                    setAnalysisResult(null);
+                    setShowIntensitySlider(false);
+                  }}
+                  className="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white neon-glow-blue"
+                  size="lg"
+                >
+                  Record Another
+                </Button>
+                <Button
+                  onClick={() => setShowComparison(!showComparison)}
+                  variant="outline"
+                  className="btn-3d border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10"
+                  size="lg"
+                >
+                  {showComparison ? 'Hide' : 'Show'} Comparison
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Emotion Comparison */}
+          {showComparison && emotionRecords.length > 0 && (
+            <div className="w-full max-w-4xl">
+              <EmotionComparison
+                records={emotionRecords}
+                onRemove={handleRemoveRecord}
               />
             </div>
           )}
           {/* Info Section */}
+          {!analysisResult && (
           <div className="w-full max-w-2xl space-y-6 mt-8">
             <div className="glass-card-dark p-6 neon-glow-blue">
               <h2 className="text-2xl font-bold text-white mb-4">How It Works</h2>
@@ -227,6 +325,7 @@ export default function Home() {
               </Button>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>
