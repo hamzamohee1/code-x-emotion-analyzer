@@ -40,3 +40,11 @@
 - [x] Create feedback analytics dashboard
 - [x] Add feedback history tracking per user
 - [x] Implement feedback validation and quality checks
+
+## Renaming & Deployment
+- [ ] Rename project to Code X Emotion Analyzer
+- [ ] Update package.json with new project name
+- [ ] Update GitHub repository name
+- [ ] Remove branding/logos from application
+- [ ] Identify main HTML file location
+- [ ] Deploy to free server (Vercel/Netlify/Railway)

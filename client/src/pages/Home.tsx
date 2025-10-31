@@ -140,7 +140,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
         <div className="text-center max-w-2xl">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Voice Emotion Analyzer
+            Code X Emotion Analyzer
           </h1>
           <p className="text-xl text-slate-300 mb-8">
             Discover your emotions through voice analysis. Record a message and let our AI
@@ -164,7 +164,7 @@ export default function Home() {
         {/* Header */}
         <div className="text-center mb-12 animate-float">
           <h1 className="text-5xl md:text-6xl font-bold mb-4 gradient-text">
-            Voice Emotion Analyzer
+            Code X Emotion Analyzer
           </h1>
           <p className="text-lg text-slate-400 font-light">
             Record your voice and discover your emotional state

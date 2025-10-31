@@ -1,6 +1,7 @@
 {
-  "name": "voice_emotion_analyzer",
+  "name": "code-x-emotion-analyzer",
   "version": "1.0.0",
+  "description": "Code X Emotion Analyzer - A 3D animated voice emotion analyzer using deep learning",
   "type": "module",
   "license": "MIT",
   "scripts": {
